@@ -1,5 +1,6 @@
 <template>
-  <div class="wrapper">
+<div>分类</div>
+  <!-- <div class="wrapper">
     <ul class="content">
       <li>1</li>
       <li>2</li>
@@ -52,34 +53,34 @@
       <li>49</li>
       <li>50</li>
     </ul>
-  </div>
+  </div> -->
 </template>
 
 <script>
-import BScroll from "better-scroll";
+// import BScroll from "better-scroll";
 export default {
   name: "Category",
-  data(){
-    return {
-      scroll:null
-    }
-  },
-  mounted() {
-    console.log(document.querySelector(".wrapper"));
-    // new BScroll(document.querySelector(".wrapper"), {});
-    this.scroll = new BScroll(document.querySelector(".wrapper"), {
-      probeType:3,
-      pullUpLoad:true
+  // data(){
+  //   return {
+  //     scroll:null
+  //   }
+  // },
+  // mounted() {
+  //   console.log(document.querySelector(".wrapper"));
+  //   // new BScroll(document.querySelector(".wrapper"), {});
+  //   this.scroll = new BScroll(document.querySelector(".wrapper"), {
+  //     probeType:3,
+  //     pullUpLoad:true
 
-    });
-    this.scroll.on('scroll',(position)=>{
-      console.log(position);
-    })
-    this.scroll.on('pullingUp',()=>{
-      console.log('上拉加载更多');
-    })
+  //   });
+  //   this.scroll.on('scroll',(position)=>{
+  //     console.log(position);
+  //   })
+  //   this.scroll.on('pullingUp',()=>{
+  //     console.log('上拉加载更多');
+  //   })
 
-  },
+  // },
 };
 </script>
 

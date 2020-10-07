@@ -1,7 +1,14 @@
 <template>
   <div id="home">
     <nav-bar class="home-nav"> <div slot="center">购物街</div></nav-bar>
-    <scroll class="content" ref="scroll">
+    <scroll
+      class="content"
+      ref="scroll"
+      :probe-type="3"
+      @scroll="contentScroll"
+      :pull-up-load='true'
+      @pullingUp='loadMore'
+    >
       <home-swiper :banners="banners" />
       <recommend-view :recommend="recommend" />
       <feature-view />
@@ -13,8 +20,7 @@
       <!-- <goods-list :goods="goods[currentType].list" /> -->
       <goods-list :goods="showGoods" />
     </scroll>
-    <back-top @click.native='backClick'/>
-    
+    <back-top @click.native="backClick" v-show="isShowBackTop" />
   </div>
 </template>
 
@@ -29,7 +35,7 @@ import NavBar from "../../components/common/navbar/NavBar";
 import TabControl from "components/content/tabControl/TabControl";
 import GoodsList from "components/content/goods/GoodsList";
 import Scroll from "components/common/scroll/Scroll";
-import BackTop from "components/content/backTop/BackTop"
+import BackTop from "components/content/backTop/BackTop";
 
 //方法，额外数据
 import { getHomeMultidata, getHomeGoods } from "network/home";
@@ -45,7 +51,7 @@ export default {
     TabControl,
     GoodsList,
     Scroll,
-    BackTop
+    BackTop,
   },
   data() {
     return {
@@ -57,6 +63,7 @@ export default {
         sell: { page: 0, list: [] },
       },
       currentType: "pop",
+      isShowBackTop: true,
     };
   },
   created() {
@@ -66,6 +73,12 @@ export default {
     this.getHomeGoods("pop");
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
+
+    //3.监听item中图片加载完成
+    this.$bus.$on("itemImageLoad", () => {
+      // console.log("--------");
+      this.$refs.scroll.refresh();
+    });
   },
   computed: {
     showGoods() {
@@ -87,11 +100,21 @@ export default {
           break;
       }
     },
-    backClick(){
-      console.log('backClick');
-      this.$refs.scroll.scrollTo(0,0);
+    backClick() {
+      // console.log('backClick');
+      this.$refs.scroll.scrollTo(0, 0);
     },
-
+    contentScroll(position) {
+      // console.log(position);
+      this.isShowBackTop = -position.y > 1000;
+    },
+    loadMore(){
+      console.log('加载更多');
+      this.getHomeGoods(this.currentType)
+      // this.$refs.scroll.scroll.finishPullUp()
+      this.$refs.scroll.finishPullUp()
+      this.$refs.scroll.refresh(); //解决图片异步加载后撑高盒子，下边图片显示不全的bug
+    },
     //网络请求相关方法
     getHomeMultidata() {
       getHomeMultidata().then((res) => {
@@ -115,9 +138,9 @@ export default {
 <style scoped>
 #home {
   /* padding-top: 44px; */
-  height: 100vh;   
+  height: 100vh;
   /* home 100个视口 */
-  /* position: relative; */
+  position: relative;
 }
 .home-nav {
   background-color: rgb(230, 164, 175);
@@ -134,17 +157,18 @@ export default {
   top: 44px;
   z-index: 9;
 }
-/* .content{
+.content {
   overflow: hidden;
   position: absolute;
   top: 44px;
   bottom: 49px;
   left: 0;
   right: 0;
-} */
-.content{
-  height: calc(100%-93px);
-  overflow: hidden;
-  margin-top: 44px;
 }
+/* .content{
+  height: calc(100%-93px);
+  /* height: 300px; */
+/* overflow: hidden;
+  margin-top: 44px; */
+/* }  */
 </style>
