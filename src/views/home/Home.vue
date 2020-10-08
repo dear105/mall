@@ -1,21 +1,28 @@
 <template>
   <div id="home">
     <nav-bar class="home-nav"> <div slot="center">购物街</div></nav-bar>
+    <tab-control
+        :titles="['流行', '新款', '精选']"
+        @tabclick="tabclick"
+        ref="tabControl1"
+        class="tab-control"
+        v-show="isTabFixed"
+      />
     <scroll
       class="content"
       ref="scroll"
       :probe-type="3"
       @scroll="contentScroll"
-      :pull-up-load='true'
-      @pullingUp='loadMore'
+      :pull-up-load="true"
+      @pullingUp="loadMore"
     >
-      <home-swiper :banners="banners" />
+      <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad" />
       <recommend-view :recommend="recommend" />
       <feature-view />
       <tab-control
-        class="tab-control"
         :titles="['流行', '新款', '精选']"
         @tabclick="tabclick"
+        ref="tabControl2"
       />
       <!-- <goods-list :goods="goods[currentType].list" /> -->
       <goods-list :goods="showGoods" />
@@ -39,6 +46,7 @@ import BackTop from "components/content/backTop/BackTop";
 
 //方法，额外数据
 import { getHomeMultidata, getHomeGoods } from "network/home";
+import { debounce } from "common/utils";
 
 export default {
   name: "Home",
@@ -64,6 +72,9 @@ export default {
       },
       currentType: "pop",
       isShowBackTop: true,
+      tabOffsetTop: 0,
+      isTabFixed: false,
+      saveY:0
     };
   },
   created() {
@@ -73,13 +84,29 @@ export default {
     this.getHomeGoods("pop");
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
-
+  },
+  mounted() {
+    //记住：不要在created里用$refs
     //3.监听item中图片加载完成
+    const refresh = debounce(this.$refs.scroll.refresh, 500);
     this.$bus.$on("itemImageLoad", () => {
-      // console.log("--------");
-      this.$refs.scroll.refresh();
+      refresh();
+      //  this.$refs.scroll && this.$refs.scroll.refresh();
     });
   },
+  // destroy(){
+  //   console.log('destroy');
+  // },
+  // activated(){
+  //   console.log('activated');
+  // //  this.$refs.scroll.refresh()
+  //   this.$refs.scroll.scrollTo(0,this.saveY,0.01)
+  // },
+  // deactivated(){
+  //   console.log('deactivated');  
+  //   this.saveY=this.$refs.scroll.getScrollY();
+
+  // },
   computed: {
     showGoods() {
       return this.goods[this.currentType].list;
@@ -87,6 +114,7 @@ export default {
   },
   methods: {
     // 事件监听相关方法
+
     tabclick(index) {
       switch (index) {
         case 0:
@@ -99,6 +127,8 @@ export default {
           this.currentType = "sell";
           break;
       }
+      this.$refs.tabControl1.currentIndex=index;
+      this.$refs.tabControl2.currentIndex=index;
     },
     backClick() {
       // console.log('backClick');
@@ -106,14 +136,21 @@ export default {
     },
     contentScroll(position) {
       // console.log(position);
+      //1.判断BackTop是否显示
       this.isShowBackTop = -position.y > 1000;
+      //2.决定tabControl是否吸顶(position:fixed)
+      this.isTabFixed = -position.y > this.tabOffsetTop;
     },
-    loadMore(){
-      console.log('加载更多');
-      this.getHomeGoods(this.currentType)
+    loadMore() {
+      // console.log("加载更多");
+      this.getHomeGoods(this.currentType);
       // this.$refs.scroll.scroll.finishPullUp()
-      this.$refs.scroll.finishPullUp()
+      this.$refs.scroll.finishPullUp();
       this.$refs.scroll.refresh(); //解决图片异步加载后撑高盒子，下边图片显示不全的bug
+    },
+    swiperImageLoad() {
+      console.log(this.$refs.tabControl2.$el.offsetTop);
+      this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop;
     },
     //网络请求相关方法
     getHomeMultidata() {
@@ -146,17 +183,17 @@ export default {
   background-color: rgb(230, 164, 175);
   color: #fff;
 
-  position: fixed;
+  /* position: fixed;
   right: 0;
   left: 0;
   top: 0;
-  z-index: 9;
+  z-index: 9; */
 }
-.tab-control {
+/* .tab-control {
   position: sticky;
   top: 44px;
   z-index: 9;
-}
+} */
 .content {
   overflow: hidden;
   position: absolute;
@@ -164,6 +201,10 @@ export default {
   bottom: 49px;
   left: 0;
   right: 0;
+}
+.tab-control{
+  position: relative;
+  z-index: 9;
 }
 /* .content{
   height: calc(100%-93px);
