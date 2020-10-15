@@ -114,7 +114,6 @@ export default {
   },
   methods: {
     // 事件监听相关方法
-
     tabclick(index) {
       switch (index) {
         case 0:
