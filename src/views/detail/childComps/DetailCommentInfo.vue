@@ -1,5 +1,5 @@
 <template>
-<div v-if="Object.keys(commentInfo).length !==0" class="comment-info">
+  <div v-if="Object.keys(commentInfo).length !== 0" class="comment-info">
     <div class="info-header">
       <div class="header-title">用户评价</div>
       <div class="header-more">更多</div>
@@ -7,42 +7,45 @@
     </div>
     <div class="info-user">
       <img :src="commentInfo.user.avatar" alt />
-      <span>{{commentInfo.user.uname}}</span>
+      <span>{{ commentInfo.user.uname }}</span>
     </div>
     <div class="info-detail">
-      <p>{{commentInfo.content}}</p>
+      <p>{{ commentInfo.content }}</p>
       <div class="info-other">
-        <span class="date">{{commentInfo.created |showDate()}}</span>
-        <span>{{commentInfo.style}}</span>
+        <span class="date">{{ commentInfo.created | showDate() }}</span>
+        <span>{{ commentInfo.style }}</span>
       </div>
       <div class="info-imgs">
-        <img :src="item" v-for="(item, index) in commentInfo.images
-        " :key="index" />
+        <img
+          :src="item"
+          v-for="(item, index) in commentInfo.images"
+          :key="index"
+        />
       </div>
     </div>
   </div>
 </template>
-<script>
+ <script>
 import { formatDate } from "@/common/utils";
 export default {
-name: 'DetailCommentInfo',
-props:{
-   commentInfo:{
-       type:Object,
-       default(){
-           return {}
-       }
-   }
-},
- filters: {
+  name: "DetailCommentInfo",
+  props: {
+    commentInfo: {
+      type: Object,
+      default() {
+        return {};
+      },
+    },
+  },
+  filters: {
     showDate(value) {
       // 将时间戳转换为Data对象
       const date = new Date(value * 1000);
       // 将date进行格式化
       return formatDate(date, "yyyy-MM-dd");
-    }
-  }
-}
+    },
+  },
+};
 </script>
 <style scoped>
 .comment-info {
@@ -102,4 +105,4 @@ props:{
   height: 70px;
   margin-right: 5px;
 }
-</style>
+</style> 

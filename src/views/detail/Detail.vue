@@ -1,15 +1,15 @@
 <template>
   <div id="detail">
     <!-- {{ iid }} -->
-    <detail-nav-bar />
+    <detail-nav-bar @titleClick="titleClick" />
     <scroll class="content" ref="scroll">
       <detail-swiper :top-images="topImages"></detail-swiper>
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
       <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad" />
-      <detail-param-info :param-info="paramInfo" />
-      <detail-comment-info :comment-info="commentInfo" />
-      <goods-list :goods="recommends"/>
+      <detail-param-info :param-info="paramInfo" ref="params" />
+      <detail-comment-info :comment-info="commentInfo" ref="comment" />
+      <goods-list :goods="recommends" ref="recommend" />
     </scroll>
   </div>
 </template>
@@ -23,7 +23,7 @@ import DetailParamInfo from "./childComps/DetailParamInfo";
 import DetailCommentInfo from "./childComps/DetailCommentInfo";
 
 import Scroll from "components/common/scroll/Scroll";
-import GoodsList from "components/content/goods/GoodsList"
+import GoodsList from "components/content/goods/GoodsList";
 
 import {
   getDetail,
@@ -32,6 +32,9 @@ import {
   GoodsParam,
   getRecommend,
 } from "network/detail";
+
+import { debounce } from "common/utils";
+import { itemListenerMixin } from "common/mixin";
 
 export default {
   name: "Detail",
@@ -44,7 +47,7 @@ export default {
     DetailParamInfo,
     DetailCommentInfo,
     Scroll,
-    GoodsList
+    GoodsList,
   },
   data() {
     return {
@@ -56,8 +59,12 @@ export default {
       paramInfo: {},
       commentInfo: {},
       recommends: [],
+      themeTopYs: [],
+      getThemeTopY: null,
+      // itemImgListener: null
     };
   },
+  mixins: [itemListenerMixin],
   created() {
     //1.保存传入的iid
     this.iid = this.$route.params.iid;
@@ -93,6 +100,36 @@ export default {
       if (data.rate.cRate !== 0) {
         this.commentInfo = data.rate.list[0];
       }
+
+      //1.第一次获取，值undefined：this.$refs.params.$el压根没有渲染
+      // this.themeTopYs = [];
+      // this.themeTopYs.push(0);
+      // this.themeTopYs.push(this.$refs.params.$el.offsetTop);
+      // this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
+      // this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
+      // console.log(this.themeTopYs);
+
+      //  //2.第二次获取，值不对：图片没有计算在内
+      //   //根据最新的数据，对应的DOM已经渲染出来，
+      //   //但是图片依然没有加载完(目前获取到的offsetTop不包含其中图片)
+      //   //一般offsetTop智不对，都是因为图片的问题
+      // this.$nextTick(() => {
+      //   this.themeTopYs = [];
+      //   this.themeTopYs.push(0);
+      //   this.themeTopYs.push(this.$refs.params.$el.offsetTop);
+      //   this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
+      //   this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
+      //   console.log(this.themeTopYs);
+      // });
+      //4.第四次，加入防抖
+      this.getThemeTopY = debounce(() => {
+        this.themeTopYs = [];
+        this.themeTopYs.push(0);
+        this.themeTopYs.push(this.$refs.params.$el.offsetTop);
+        this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
+        this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
+        console.log(this.themeTopYs);
+      },100);
     });
 
     //3.请求推荐数据
@@ -100,10 +137,38 @@ export default {
       this.recommends = res.data.list;
     });
   },
+  mounted() {
+    //在mixim.js封装起来了
+    // const refresh = debounce(this.$refs.scroll.refresh, 500);
+    // this.itemImgListener=() => {
+    //   refresh();
+    // }
+    // this.$bus.$on("itemImageLoad",this.itemImgListener)
+    // console.log(222);
+  },
+  // updated() {
+  //   this.themeTopYs = [];
+  //   this.themeTopYs.push(0);
+  //   this.themeTopYs.push(this.$refs.params.$el.offsetTop);
+  //   this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
+  //   this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
+  //   console.log(this.themeTopYs);
+  // },
+  destroyed() {
+    this.$bus.$off("itemImgLoad", this.itemImgListener);
+  },
 
   methods: {
     imageLoad() {
+      // console.log('---------');
       this.$refs.scroll.refresh();
+      // this.refresh()
+      //4.第四次获取，值对
+      this.getThemeTopY();
+    },
+    titleClick(index) {
+      // console.log(index);
+      this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 200);
     },
   },
 };

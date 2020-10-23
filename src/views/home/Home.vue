@@ -2,12 +2,12 @@
   <div id="home">
     <nav-bar class="home-nav"> <div slot="center">购物街</div></nav-bar>
     <tab-control
-        :titles="['流行', '新款', '精选']"
-        @tabclick="tabclick"
-        ref="tabControl1"
-        class="tab-control"
-        v-show="isTabFixed"
-      />
+      :titles="['流行', '新款', '精选']"
+      @tabclick="tabclick"
+      ref="tabControl1"
+      class="tab-control"
+      v-show="isTabFixed"
+    />
     <scroll
       class="content"
       ref="scroll"
@@ -47,6 +47,7 @@ import BackTop from "components/content/backTop/BackTop";
 //方法，额外数据
 import { getHomeMultidata, getHomeGoods } from "network/home";
 import { debounce } from "common/utils";
+import { itemListenerMixin }  from "common/mixin"
 
 export default {
   name: "Home",
@@ -74,9 +75,11 @@ export default {
       isShowBackTop: true,
       tabOffsetTop: 0,
       isTabFixed: false,
-      saveY:0
+      saveY:0,
+      // itemImgListener: null
     };
   },
+   mixins:[itemListenerMixin],
   created() {
     //1.请求多个数据
     this.getHomeMultidata();
@@ -88,12 +91,22 @@ export default {
   mounted() {
     //记住：不要在created里用$refs
     //3.监听item中图片加载完成
-    const refresh = debounce(this.$refs.scroll.refresh, 500);
-    this.$bus.$on("itemImageLoad", () => {
-      refresh();
+    // const refresh = debounce(this.$refs.scroll.refresh, 500);
+    // this.itemImgListener=() => {
+    //   refresh();
+    // }
+    // this.$bus.$on("itemImageLoad",this.itemImgListener)
+
+    // console.log(111);
+
+    // this.$bus.$on("itemImageLoad", () => {
+    //   refresh();
       //  this.$refs.scroll && this.$refs.scroll.refresh();
-    });
+    //});
   },
+   deactivated(){
+     this.$bus.$off('itemImgLoad',this.itemImgListener)
+   },
   // destroy(){
   //   console.log('destroy');
   // },
@@ -201,7 +214,7 @@ export default {
   left: 0;
   right: 0;
 }
-.tab-control{
+.tab-control {
   position: relative;
   z-index: 9;
 }
