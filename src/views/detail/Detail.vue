@@ -8,6 +8,13 @@
       :probe-type="3"
       @scroll="contentScroll"
     >
+      
+     <!-- 输出看一下 vuex 的数据能拿到不 -->
+        <!-- <ul>        
+        <li v-for="(item, index) in $store.state.cartList" :key="index">
+          {{ item }}
+        </li>
+      </ul> -->
       <detail-swiper :top-images="topImages"></detail-swiper>
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
@@ -17,7 +24,7 @@
       <goods-list :goods="recommends" ref="recommend" />
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop" />
-    <detail-bottom-bar />
+    <detail-bottom-bar @addCart="addToCart" />
   </div>
 </template>
 <script>
@@ -28,7 +35,7 @@ import DetailShopInfo from "./childComps/DetailShopInfo";
 import DetailGoodsInfo from "./childComps/DetailGoodsInfo";
 import DetailParamInfo from "./childComps/DetailParamInfo";
 import DetailCommentInfo from "./childComps/DetailCommentInfo";
-import DetailBottomBar from "./childComps/DetailBottomBar"
+import DetailBottomBar from "./childComps/DetailBottomBar";
 
 import Scroll from "components/common/scroll/Scroll";
 import GoodsList from "components/content/goods/GoodsList";
@@ -42,7 +49,7 @@ import {
 } from "network/detail";
 
 import { debounce } from "common/utils";
-import { itemListenerMixin,backTopMixin } from "common/mixin";
+import { itemListenerMixin, backTopMixin } from "common/mixin";
 
 export default {
   name: "Detail",
@@ -75,14 +82,14 @@ export default {
       // itemImgListener: null
     };
   },
-  mixins: [itemListenerMixin,backTopMixin],
+  mixins: [itemListenerMixin, backTopMixin],
   created() {
     //1.保存传入的iid
     this.iid = this.$route.params.iid;
 
     //2.根据iid请求详情数据
     getDetail(this.iid).then((res) => {
-      console.log(res);
+      // console.log(res);
       //1.获取顶部轮播数据
       // console.log(res.result.itemInfo.topImages);
       const data = res.result;
@@ -150,7 +157,7 @@ export default {
     });
   },
   mounted() {
-    //在mixim.js封装起来了
+    //在mixin.js封装起来了
     // const refresh = debounce(this.$refs.scroll.refresh, 500);
     // this.itemImgListener=() => {
     //   refresh();
@@ -212,12 +219,26 @@ export default {
           this.$refs.nav.currentIndex = this.currentIndex;
         }
       }
-      
+
       //3.判断BackTop是否显示
-       this.listenShowBackTop(position)
+      this.listenShowBackTop(position);
+    },
+    addToCart() {
+      // console.log("加入购物车");
+      //1.获取购物车需要显示的信息
+      const product = {};
+      product.image = this.topImages[0];
+      product.title = this.goods.title;
+      product.desc = this.goods.desc;
+      product.price = this.goods.realPrice;
+      product.iid = this.iid;
+      //2.将商品添加到购物车
+      //this.$store.cartList.push(product);  //不要直接改
+      //this.$store.commit("addCart", product);
+      this.$store.dispatch('addCart',product)
+
     },
   },
-    
 };
 </script>
 <style scoped>

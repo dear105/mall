@@ -26,7 +26,7 @@ export default {
   },
   mounted() {
     // observeDOM:true;
-    console.log(this.$refs.wrapper);
+    // console.log(this.$refs.wrapper);
     //不要使用这种方法，有多个wrapper 时不好确认
     // this.scroll=new BScroll(document.querySelector('.wrapper'),{
     //   click:true

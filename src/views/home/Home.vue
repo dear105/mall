@@ -47,7 +47,7 @@ import BackTop from "components/content/backTop/BackTop";
 //方法，额外数据
 import { getHomeMultidata, getHomeGoods } from "network/home";
 import { debounce } from "common/utils";
-import { itemListenerMixin }  from "common/mixin"
+import { itemListenerMixin } from "common/mixin";
 
 export default {
   name: "Home",
@@ -75,11 +75,11 @@ export default {
       isShowBackTop: false,
       tabOffsetTop: 0,
       isTabFixed: false,
-      saveY:0,
+      saveY: 0,
       // itemImgListener: null
     };
   },
-   mixins:[itemListenerMixin],
+  mixins: [itemListenerMixin],
   created() {
     //1.请求多个数据
     this.getHomeMultidata();
@@ -96,30 +96,28 @@ export default {
     //   refresh();
     // }
     // this.$bus.$on("itemImageLoad",this.itemImgListener)
-
     // console.log(111);
-
     // this.$bus.$on("itemImageLoad", () => {
     //   refresh();
-      //  this.$refs.scroll && this.$refs.scroll.refresh();
+    //  this.$refs.scroll && this.$refs.scroll.refresh();
     //});
   },
-   deactivated(){
-     this.$bus.$off('itemImgLoad',this.itemImgListener)
-   },
+  // deactivated() {
+  //   this.$bus.$off("itemImgLoad", this.itemImgListener);
+  // },
   // destroy(){
   //   console.log('destroy');
   // },
-  // activated(){
-  //   console.log('activated');
-  // //  this.$refs.scroll.refresh()
-  //   this.$refs.scroll.scrollTo(0,this.saveY,0.01)
-  // },
-  // deactivated(){
-  //   console.log('deactivated');  
-  //   this.saveY=this.$refs.scroll.getScrollY();
-
-  // },
+  activated() {
+    // console.log('activated');
+    this.$refs.scroll.refresh(); //强制刷新一次，不然会出现奇怪的问题
+    this.$refs.scroll.scrollTo(0, this.saveY, 0.01);
+  },
+  deactivated() {
+    // console.log('deactivated');
+   this.saveY = this.$refs.scroll.getScrollY();
+    this.$bus.$off("itemImgLoad", this.itemImgListener);
+  },
   computed: {
     showGoods() {
       return this.goods[this.currentType].list;
@@ -139,8 +137,8 @@ export default {
           this.currentType = "sell";
           break;
       }
-      this.$refs.tabControl1.currentIndex=index;
-      this.$refs.tabControl2.currentIndex=index;
+      this.$refs.tabControl1.currentIndex = index;
+      this.$refs.tabControl2.currentIndex = index;
     },
     backClick() {
       // console.log('backClick');
