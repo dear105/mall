@@ -1,14 +1,13 @@
 <template>
   <div class="cart-list">
-    <scroll class="content">
+    <scroll class="content" ref="scroll">
       <cart-list-item
         v-for="(item, index) in cartList"
         :key="index"
-        :product="item"
-        >{{ item }}</cart-list-item
-      >
+        :item-info="item"
+      ></cart-list-item>
 
-      <!-- <ul>
+      <ul>
         <li>1</li>
         <li>2</li>
         <li>3</li>
@@ -59,7 +58,7 @@
         <li>48</li>
         <li>49</li>
         <li>50</li>
-      </ul> -->
+      </ul>
     </scroll>
   </div>
 </template>
@@ -77,15 +76,35 @@ export default {
   computed: {
     ...mapGetters(["cartList"]),
   },
+  activated() {
+    this.$refs.scroll.refresh();
+  },
 };
 </script>
 <style scoped>
-.cart-list {
-  height: 100vh;
+/* .cart-list {
+  height: calc(100% - 44px - 49px);
 }
-/* .content {
-  height: calc(100%-44px);
+.content {
+  height: 100%;
+  height: 300px;
+  overflow: hidden;
+  background-color: yellow;
 } */
+
+/* .cart-list {
+  height: 100vh;
+  height: calc(100%-44px-49px-40px);
+} */
+/* .content {
+  height: calc(100%-44px-49px-40px);
+  background-color: red;
+  height: 100%;
+  height: 300px;
+  overflow: hidden;
+} */
+
+
 .content {
   overflow: hidden;
   position: absolute;
