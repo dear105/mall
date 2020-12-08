@@ -7,7 +7,7 @@
         :item-info="item"
       ></cart-list-item>
 
-      <ul>
+      <!-- <ul>
         <li>1</li>
         <li>2</li>
         <li>3</li>
@@ -58,7 +58,7 @@
         <li>48</li>
         <li>49</li>
         <li>50</li>
-      </ul>
+      </ul> -->
     </scroll>
   </div>
 </template>
